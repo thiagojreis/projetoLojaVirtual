@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja Virtual - Streetwear Minimalist</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-neutral-900 text-neutral-100 font-sans min-h-screen flex flex-col selection:bg-neutral-700 selection:text-white">
+
+    <!-- CABEÇALHO / NAVBAR MINIMALISTA -->
+    <header class="bg-black border-b border-neutral-800 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="location.reload()">
+                <i class="fa-solid fa-square-full text-white text-xs tracking-widest"></i>
+                <h1 class="text-xl font-black uppercase tracking-widest text-white">Loja<span class="text-neutral-400">Virtual</span></h1>
+            </div>
+
+            <!-- Controles de Visão, Perfil e Carrinho -->
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- Seletor de Modo (Cliente vs Admin) -->
+                <div class="bg-neutral-900 p-1 rounded-lg border border-neutral-800 flex text-xs font-semibold uppercase tracking-wider">
+                    <button id="btn-modo-cliente" onclick="alternarModo('cliente')" class="px-3 py-1.5 rounded-md bg-white text-black transition">
+                        Cliente
+                    </button>
+                    <button id="btn-modo-admin" onclick="alternarModo('admin')" class="px-3 py-1.5 rounded-md text-neutral-400 hover:text-white transition">
+                        Admin
+                    </button>
+                </div>
+
+                <!-- Botão de Entrar (Cliente Deslogado) -->
+                <button id="btn-login-cliente-header" onclick="abrirModalAuthCliente()" class="bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-800 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition flex items-center gap-2">
+                    <i class="fa-solid fa-user text-neutral-400"></i>
+                    <span>Entrar</span>
+                </button>
+
+                <!-- Status de Login / Botão Sair -->
+                <div id="area-usuario" class="hidden flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-3 py-1.5 rounded-lg text-xs">
+                    <i class="fa-solid fa-circle-user text-neutral-400"></i>
+                    <span id="nome-usuario-logado" class="font-bold text-white"></span>
+                    <button onclick="realizarLogout()" class="text-neutral-500 hover:text-rose-400 ml-1 transition" title="Sair / Logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+
+                <!-- Botão do Carrinho -->
+                <button id="btn-abrir-carrinho" onclick="abrirModalCarrinho()" class="relative bg-white hover:bg-neutral-200 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition flex items-center gap-2">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span>Carrinho</span>
+                    <span id="badge-carrinho" class="bg-black text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center border border-neutral-700">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- BANNER HERO MINIMALISTA -->
+    <section class="bg-neutral-950 border-b border-neutral-800 py-12 px-6 text-center">
+        <span class="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500 mb-2 block">Drop 2026 / Essential Collection</span>
+        <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tight text-white mb-3">STREETWEAR</h2>
+        <p class="text-neutral-400 text-sm max-w-md mx-auto">Modelagens oversized, tecidos encorpados e corte contemporâneo.</p>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-6 py-10 flex-grow w-full">
+        
+        <!-- BARRA ADMIN -->
+        <div id="painel-admin-bar" class="hidden bg-neutral-950 border border-neutral-800 text-white p-5 rounded-xl mb-8 flex justify-between items-center">
+            <div>
+                <h3 class="font-bold text-sm uppercase tracking-wider text-white"><i class="fa-solid fa-sliders mr-2 text-neutral-400"></i>Painel Administrativo</h3>
+                <p class="text-xs text-neutral-500">Gerencie o estoque e o catálogo do e-commerce.</p>
+            </div>
+            <button onclick="abrirModalNovoProduto()" class="bg-white hover:bg-neutral-200 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> Novo Item
+            </button>
+        </div>
+
+        <!-- FILTROS E BUSCA -->
+        <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 mb-8 pb-6 border-b border-neutral-800">
+            <!-- Categorias -->
+            <div class="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wider">
+                <button onclick="filtrarCategoria('todos')" class="btn-categoria px-4 py-2 rounded-lg bg-white text-black border border-white transition" data-cat="todos">Todos</button>
+                <button onclick="filtrarCategoria('manga-curta')" class="btn-categoria px-4 py-2 rounded-lg bg-neutral-950 text-neutral-400 border border-neutral-800 hover:text-white transition" data-cat="manga-curta">Manga Curta</button>
+                <button onclick="filtrarCategoria('manga-longa')" class="btn-categoria px-4 py-2 rounded-lg bg-neutral-950 text-neutral-400 border border-neutral-800 hover:text-white transition" data-cat="manga-longa">Manga Longa</button>
+                <button onclick="filtrarCategoria('calca')" class="btn-categoria px-4 py-2 rounded-lg bg-neutral-950 text-neutral-400 border border-neutral-800 hover:text-white transition" data-cat="calca">Calças Jeans</button>
+            </div>
+
+            <!-- Pesquisa -->
+            <div class="relative min-w-[240px]">
+                <input type="text" id="campo-busca" oninput="filtrarPorBusca()" placeholder="Buscar peças..." class="w-full bg-neutral-950 border border-neutral-800 text-white text-xs rounded-lg px-4 py-2.5 pl-9 outline-none focus:border-white transition">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-neutral-500 text-xs"></i>
+            </div>
+        </div>
+
+        <!-- GRADE DE PRODUTOS -->
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-neutral-400">Catálogo Disponível</h3>
+            <span id="total-produtos-label" class="text-xs text-neutral-500">Carregando catálogo...</span>
+        </div>
+
+        <div id="grid-produtos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <!-- Cards de produtos serão renderizados via JS -->
+        </div>
+    </main>
+
+    <!-- MODAL: CARRINHO -->
+    <div id="modal-carrinho" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
+        <div class="bg-neutral-950 border border-neutral-800 text-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="bg-black p-5 border-b border-neutral-800 flex justify-between items-center">
+                <h3 class="font-bold text-xs uppercase tracking-widest text-white"><i class="fa-solid fa-bag-shopping mr-2 text-neutral-400"></i>Seu Carrinho</h3>
+                <button onclick="fecharModalCarrinho()" class="text-neutral-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="lista-carrinho" class="p-5 overflow-y-auto space-y-4 flex-grow">
+                <!-- Itens do carrinho -->
+            </div>
+            <div class="p-5 bg-black border-t border-neutral-800">
+                <div class="flex justify-between items-center mb-4 text-sm font-bold uppercase tracking-wider">
+                    <span class="text-neutral-400">Subtotal:</span>
+                    <span id="valor-total-carrinho" class="text-white text-base">R$ 0,00</span>
+                </div>
+                <button id="btn-finalizar-compra" onclick="iniciarCheckout()" class="w-full bg-white hover:bg-neutral-200 text-black font-bold text-xs uppercase tracking-widest py-3.5 rounded-xl transition">
+                    Avançar para Pagamento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PAGAMENTO & CHECKOUT -->
+    <div id="modal-pagamento" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
+        <div class="bg-neutral-950 border border-neutral-800 text-white rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-bold text-sm uppercase tracking-widest text-white"><i class="fa-solid fa-credit-card mr-2 text-neutral-400"></i>Forma de Pagamento</h3>
+                    <p class="text-xs text-neutral-500">Escolha como deseja pagar o seu pedido.</p>
+                </div>
+                <button onclick="fecharModalPagamento()" class="text-neutral-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Opções de Pagamento -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button type="button" onclick="selecionarMetodoPagamento('pix')" id="btn-pag-pix" class="border-2 border-white bg-neutral-900 p-4 rounded-xl text-center flex flex-col items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-qrcode text-2xl text-emerald-400"></i>
+                    <span class="text-xs font-bold uppercase tracking-wider">PIX (Instantâneo)</span>
+                </button>
+                <button type="button" onclick="selecionarMetodoPagamento('cartao')" id="btn-pag-cartao" class="border border-neutral-800 bg-neutral-950 p-4 rounded-xl text-center flex flex-col items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-credit-card text-2xl text-indigo-400"></i>
+                    <span class="text-xs font-bold uppercase tracking-wider">Cartão de Crédito</span>
+                </button>
+            </div>
+
+            <!-- Área Dinâmica: PIX -->
+            <div id="area-pag-pix" class="bg-black border border-neutral-800 p-5 rounded-xl text-center space-y-3 mb-6">
+                <p class="text-xs text-neutral-400 uppercase tracking-wider font-semibold">Escaneie o QR Code abaixo para pagar:</p>
+                <div class="flex justify-center my-2">
+                    <!-- QR Code Fictício via API pública -->
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=00020126580014br.gov.bcb.pix0136cybermarket-chavedetestepix-20265204000053039865405100.005802BR5916CYBERMARKET_LOJA6008RECIFE62070503***6304E2CA" alt="QR Code PIX Fictício" class="w-44 h-44 rounded-lg border-4 border-white p-1 bg-white">
+                </div>
+                <div class="bg-neutral-900 border border-neutral-800 p-2.5 rounded-lg flex items-center justify-between gap-2 text-[10px] text-neutral-400 font-mono">
+                    <span class="truncate">00020126580014br.gov.bcb.pix0136cybermarket-chavedeteste...</span>
+                    <button type="button" onclick="copiarPix()" class="bg-neutral-800 hover:bg-neutral-700 text-white px-2.5 py-1 rounded font-sans uppercase font-bold text-[9px] shrink-0">Copiar</button>
+                </div>
+            </div>
+
+            <!-- Área Dinâmica: Cartão -->
+            <div id="area-pag-cartao" class="hidden space-y-3 mb-6">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Número do Cartão</label>
+                    <input type="text" placeholder="0000 0000 0000 0000" maxlength="19" class="w-full bg-black border border-neutral-800 rounded-lg p-2.5 text-xs text-white outline-none focus:border-white transition">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Validade</label>
+                        <input type="text" placeholder="MM/AA" maxlength="5" class="w-full bg-black border border-neutral-800 rounded-lg p-2.5 text-xs text-white outline-none focus:border-white transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1">CVV</label>
+                        <input type="text" placeholder="123" maxlength="4" class="w-full bg-black border border-neutral-800 rounded-lg p-2.5 text-xs text-white outline-none focus:border-white transition">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="confirmarEFinalizarPedido()" class="w-full bg-white hover:bg-neutral-200 text-black font-bold text-xs uppercase tracking-widest py-3.5 rounded-xl transition">
+                Confirmar Pagamento e Finalizar
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: LOGIN DO CLIENTE -->
+    <div id="modal-auth" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
+        <div class="bg-neutral-950 border border-neutral-800 text-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-bold text-sm uppercase tracking-widest text-white">Identificação do Cliente</h3>
+                    <p class="text-xs text-neutral-500">Informe seus dados para entrar ou cadastrar.</p>
+                </div>
+                <button onclick="fecharModalAuth()" class="text-neutral-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-auth" onsubmit="realizarAutenticacao(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Nome Completo</label>
+                    <input type="text" id="auth-nome" required class="w-full bg-black border border-neutral-800 rounded-lg p-2.5 text-xs text-white outline-none focus:border-white transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">E-mail</label>
+                    <input type="email" id="auth-email" required class="w-full bg-black border border-neutral-800 rounded-lg p-2.5 text-xs text-white outline-none focus:border-white transition">
+                </div>
+                <button type="submit" class="w-full bg-white hover:bg-neutral-200 text-black font-bold text-xs uppercase tracking-widest py-3 rounded-xl transition mt-2">
+                    Entrar e Continuar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: LOGIN DO ADMINISTRADOR -->
+    <div id="modal-login-admin" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
+        <div class="bg-neutral-950 border border-neutral-800 text-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="font-bold text-sm uppercase tracking-widest text-white"><i class="fa-solid fa-user-shield mr-2 text-neutral-400"></i>Acesso Restrito Admin</h3>
+                    <p class="text-xs text-neutral-500">Informe as credenciais de administrador.</p>
+                </div>
+                <button onclick="fecharModalLoginAdmin()" class="text-neutral-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-login-admin" onsubmit="realizarLoginAdmin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Usuário / E-mail</label>
+                    <input type="text" id="admin-user" required placeholder="admin" class="w-full bg-black border border-neutral-800 rounded-lg p-2.5 text-xs text-white outline-none focus:border-white transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Senha</label>
+                    <input type="password" id="admin-pass" required placeholder="••••••••" class="w-full bg-black border border-neutral-800 rounded-lg p-2.5 text-xs text-white outline-none focus:border-white transition">
+                </div>
+                <button type="submit" class="w-full bg-white hover:bg-neutral-200 text-black font-bold text-xs uppercase tracking-widest py-3 rounded-xl transition mt-2">
+                    Entrar no Painel Admin
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CADASTRAR / EDITAR PRODUTO (ADMIN) -->
+    <div id="modal-produto-admin" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
+        <div class="bg-neutral-950 border border-neutral-800 text-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-sm uppercase tracking-widest text-white" id="modal-produto-titulo">Novo Item</h3>
+                <button onclick="fecharModalProdutoAdmin()" class="text-neutral-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="form-produto-admin" onsubmit="salvarProdutoAdmin(event)" class="space-y-3">
+                <input type="hidden" id="admin-prod-id">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Nome da Peça</label>
+                    <input type="text" id="admin-prod-nome" required placeholder="Ex: Camisa Manga Longa Black" class="w-full bg-black border border-neutral-800 rounded-lg p-2 text-xs text-white outline-none focus:border-white transition">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Preço (R$)</label>
+                    <input type="number" step="0.01" id="admin-prod-preco" required placeholder="129.90" class="w-full bg-black border border-neutral-800 rounded-lg p-2 text-xs text-white outline-none focus:border-white transition">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1">URL da Imagem (Opcional)</label>
+                    <input type="url" id="admin-prod-imagem" placeholder="Deixe em branco para usar a imagem padrão" class="w-full bg-black border border-neutral-800 rounded-lg p-2 text-xs text-white outline-none focus:border-white transition">
+                </div>
+                <button type="submit" class="w-full bg-white hover:bg-neutral-200 text-black font-bold text-xs uppercase tracking-widest py-3 rounded-xl transition mt-4">
+                    Salvar no Catálogo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- RODAPÉ MINIMALISTA -->
+    <footer class="bg-black border-t border-neutral-800 py-8 text-center text-xs text-neutral-500 uppercase tracking-widest">
+        <p>Loja virtual Streetwear &copy; 2026 - All Rights Reserved</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
